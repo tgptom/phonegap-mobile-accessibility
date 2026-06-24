@@ -48,9 +48,6 @@
 @synthesize voiceOverRunning;
 @synthesize mFontScale;
 
-#define iOS7Delta (([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 ) ? 20 : 0 )
-#define iOS8Delta (([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0 ) ? 30 : 0 )
-
 // //////////////////////////////////////////////////
 
 - (id)settingForKey:(NSString*)key
@@ -116,11 +113,7 @@
 - (void)isBoldTextEnabled:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.boldTextEnabled = UIAccessibilityIsBoldTextEnabled();
-        } else {
-            self.boldTextEnabled = false;
-        }
+        self.boldTextEnabled = UIAccessibilityIsBoldTextEnabled();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.boldTextEnabled];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -138,11 +131,7 @@
 - (void)isDarkerSystemColorsEnabled:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.darkerSystemColorsEnabled = UIAccessibilityDarkerSystemColorsEnabled();
-        } else {
-            self.darkerSystemColorsEnabled = false;
-        }
+        self.darkerSystemColorsEnabled = UIAccessibilityDarkerSystemColorsEnabled();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.darkerSystemColorsEnabled];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -151,11 +140,7 @@
 - (void)isGrayscaleEnabled:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.grayscaleEnabled = UIAccessibilityIsGrayscaleEnabled();
-        } else {
-            self.grayscaleEnabled = false;
-        }
+        self.grayscaleEnabled = UIAccessibilityIsGrayscaleEnabled();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.grayscaleEnabled];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -191,11 +176,7 @@
 - (void)isReduceMotionEnabled:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.reduceMotionEnabled = UIAccessibilityIsReduceMotionEnabled();
-        } else {
-            self.reduceMotionEnabled = false;
-        }
+        self.reduceMotionEnabled = UIAccessibilityIsReduceMotionEnabled();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.reduceMotionEnabled];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -204,11 +185,7 @@
 - (void)isReduceTransparencyEnabled:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.reduceTransparencyEnabled = UIAccessibilityIsReduceTransparencyEnabled();
-        } else {
-            self.reduceTransparencyEnabled = false;
-        }
+        self.reduceTransparencyEnabled = UIAccessibilityIsReduceTransparencyEnabled();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.reduceTransparencyEnabled];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -226,11 +203,7 @@
 - (void)isSpeakScreenEnabled:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.speakScreenEnabled = UIAccessibilityIsSpeakScreenEnabled();
-        } else {
-            self.speakScreenEnabled = false;
-        }
+        self.speakScreenEnabled = UIAccessibilityIsSpeakScreenEnabled();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.speakScreenEnabled];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -239,11 +212,7 @@
 - (void)isSpeakSelectionEnabled:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.speakSelectionEnabled = UIAccessibilityIsSpeakSelectionEnabled();
-        } else {
-            self.speakSelectionEnabled = false;
-        }
+        self.speakSelectionEnabled = UIAccessibilityIsSpeakSelectionEnabled();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.speakSelectionEnabled];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -252,11 +221,7 @@
 - (void)isSwitchControlRunning:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        if (iOS8Delta) {
-            self.switchControlRunning = UIAccessibilityIsSwitchControlRunning();
-        } else {
-            self.switchControlRunning = false;
-        }
+        self.switchControlRunning = UIAccessibilityIsSwitchControlRunning();
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:self.switchControlRunning];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -264,11 +229,7 @@
 
 -(double) mGetFontScale
 {
-    double fontScale = 1;
-    if (iOS7Delta)  {
-        fontScale = [[UIFont preferredFontForTextStyle:UIFontTextStyleBody] pointSize] / BASE_UI_FONT_TEXT_STYLE_BODY_POINT_SIZE;
-    }
-    return fontScale;
+    return [[UIFont preferredFontForTextStyle:UIFontTextStyleBody] pointSize] / BASE_UI_FONT_TEXT_STYLE_BODY_POINT_SIZE;
 }
 
 -(double) mGetTextZoom
@@ -291,10 +252,9 @@
 {
     // NSLog(@"mSetTextZoom %f%%'", zoom);
     mFontScale = zoom/100;
-    if (iOS7Delta)  {
-        NSString *jsString = [[NSString alloc] initWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust= '%f%%'", zoom];
-        [self.commandDelegate evalJs:jsString];
-    }
+    NSString *zoomNumber = [NSString stringWithFormat:@"%g", zoom];
+    NSString *jsString = [NSString stringWithFormat:@"document.documentElement.style.fontSize = '%@' + '%%';if(document.body){document.body.style.webkitTextSizeAdjust='%@' + '%%';}", zoomNumber, zoomNumber];
+    [self.commandDelegate evalJs:jsString];
 }
 
 - (void) setTextZoom:(CDVInvokedUrlCommand *)command
@@ -456,18 +416,16 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityGuidedAccessStatusDidChangeNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityInvertColorsStatusDidChangeNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityMonoAudioStatusDidChangeNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityVoiceOverStatusChanged object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityVoiceOverStatusDidChangeNotification object:nil];
 
-        if (iOS8Delta) {
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityBoldTextStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityGrayscaleStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityReduceMotionStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityReduceTransparencyStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilitySpeakScreenStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilitySpeakSelectionStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilitySwitchControlStatusDidChangeNotification object:nil];
-        }
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityBoldTextStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityGrayscaleStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityReduceMotionStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilityReduceTransparencyStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilitySpeakScreenStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilitySpeakSelectionStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(mobileAccessibilityStatusChanged:) name:UIAccessibilitySwitchControlStatusDidChangeNotification object:nil];
 
         // Update the callback on start
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self getMobileAccessibilityStatus]];
@@ -493,18 +451,16 @@
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityInvertColorsStatusDidChangeNotification object:nil];
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityAnnouncementDidFinishNotification object:nil];
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityMonoAudioStatusDidChangeNotification object:nil];
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityVoiceOverStatusChanged object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityVoiceOverStatusDidChangeNotification object:nil];
 
-        if (iOS8Delta) {
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityBoldTextStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityGrayscaleStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityReduceMotionStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityReduceTransparencyStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilitySpeakScreenStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilitySpeakSelectionStatusDidChangeNotification object:nil];
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilitySwitchControlStatusDidChangeNotification object:nil];
-        }
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityBoldTextStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityGrayscaleStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityReduceMotionStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilityReduceTransparencyStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilitySpeakScreenStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilitySpeakSelectionStatusDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIAccessibilitySwitchControlStatusDidChangeNotification object:nil];
     }];
 }
 

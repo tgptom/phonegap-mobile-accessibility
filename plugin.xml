@@ -2,14 +2,16 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="phonegap-plugin-mobile-accessibility"
-    version="1.0.5-dev">
+    version="2.0.0">
     <name>Mobile Accessibility</name>
     <description>PhoneGap Mobile Accessibility Plugin</description>
     <license>Apache 2.0</license>
     <keywords>phonegap, mobile accessibility</keywords>
 
     <engines>
-        <engine name="cordova" version=">=3.0.0" />
+        <engine name="cordova" version=">=12.0.0" />
+        <engine name="cordova-android" version=">=13.0.0" />
+        <engine name="cordova-ios" version=">=7.0.0" />
     </engines>
 
     <js-module src="www/mobile-accessibility.js" name="mobile-accessibility">
@@ -25,6 +27,11 @@
 
     <!-- ios -->
     <platform name="ios">
+        <podspec>
+            <config>
+                <source url="https://cdn.cocoapods.org/" />
+            </config>
+        </podspec>
         <config-file target="config.xml" parent="/*">
             <feature name="MobileAccessibility">
                 <param name="ios-package" value="CDVMobileAccessibility" onload="true" />
@@ -53,12 +60,8 @@
                 <param name="android-package" value="com.phonegap.plugin.mobileaccessibility.MobileAccessibility"/>
             </feature>
         </config-file>
-        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/MobileAccessibility.java" target-dir="src/com/phonegap/plugin/mobileaccessibility" />
-        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/AbstractMobileAccessibilityHelper.java" target-dir="src/com/phonegap/plugin/mobileaccessibility" />
-        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/DonutMobileAccessibilityHelper.java" target-dir="src/com/phonegap/plugin/mobileaccessibility" />
-        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/IceCreamSandwichMobileAccessibilityHelper.java" target-dir="src/com/phonegap/plugin/mobileaccessibility" />
-        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/JellyBeanMobileAccessibilityHelper.java" target-dir="src/com/phonegap/plugin/mobileaccessibility" />
-        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/KitKatMobileAccessibilityHelper.java" target-dir="src/com/phonegap/plugin/mobileaccessibility" />
+        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/MobileAccessibility.java" target-dir="app/src/main/java/com/phonegap/plugin/mobileaccessibility" />
+        <source-file src="src/android/com/phonegap/plugin/mobileaccessibility/MobileAccessibilityHelper.java" target-dir="app/src/main/java/com/phonegap/plugin/mobileaccessibility" />
         <asset src="www/android" target="plugins/com.phonegap.plugin.mobile-accessibility/android" />
     </platform>
 

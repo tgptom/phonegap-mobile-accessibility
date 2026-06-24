@@ -30,18 +30,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Build;
-import android.webkit.WebView;
-
-import java.lang.IllegalAccessException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * This class provides information on the status of native accessibility services to JavaScript.
  */
 public class MobileAccessibility extends CordovaPlugin {
-    private AbstractMobileAccessibilityHelper mMobileAccessibilityHelper;
+    private MobileAccessibilityHelper mMobileAccessibilityHelper;
     private CallbackContext mCallbackContext = null;
     private boolean mIsScreenReaderRunning = false;
     private boolean mClosedCaptioningEnabled = false;
@@ -52,15 +46,7 @@ public class MobileAccessibility extends CordovaPlugin {
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mMobileAccessibilityHelper = new KitKatMobileAccessibilityHelper();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mMobileAccessibilityHelper = new JellyBeanMobileAccessibilityHelper();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            mMobileAccessibilityHelper = new IceCreamSandwichMobileAccessibilityHelper();
-        } else {
-            mMobileAccessibilityHelper = new DonutMobileAccessibilityHelper();
-        }
+        mMobileAccessibilityHelper = new MobileAccessibilityHelper();
         mMobileAccessibilityHelper.initialize(this);
     }
 
@@ -137,21 +123,19 @@ public class MobileAccessibility extends CordovaPlugin {
             stop();
             cordova.getActivity().runOnUiThread(new Runnable() {
                 public void run() {
-                    WebView view;
+                    boolean cacheCleared = false;
                     try {
-                        view = (WebView) webView;
-                        view.reload();
-                    } catch(ClassCastException ce) {  // cordova-android 4.0+
-                        try {   // cordova-android 4.0+
-                            Method getView = webView.getClass().getMethod("getView");
-                            Method reload = getView.invoke(webView).getClass().getMethod("reload");
-                            reload.invoke(webView);
-                        } catch (NoSuchMethodException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
+                        if (webView.getEngine() != null) {
+                            webView.getEngine().clearCache(false);
+                            cacheCleared = true;
+                        }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                    if (!cacheCleared) {
+                        String currentUrl = webView.getUrl();
+                        if (currentUrl != null) {
+                            webView.loadUrl(currentUrl);
                         }
                     }
                 }
