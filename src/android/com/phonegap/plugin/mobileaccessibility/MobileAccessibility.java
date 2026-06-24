@@ -124,16 +124,16 @@ public class MobileAccessibility extends CordovaPlugin {
             cordova.getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     try {
-                        if (webView.getEngine() == null) {
-                            throw new IllegalStateException("CordovaWebView engine unavailable");
+                        if (webView.getEngine() != null) {
+                            webView.getEngine().clearCache(false);
+                            return;
                         }
-                        webView.getEngine().clearCache(false);
                     } catch (Throwable e) {
                         e.printStackTrace();
-                        String currentUrl = webView.getUrl();
-                        if (currentUrl != null) {
-                            webView.loadUrl(currentUrl);
-                        }
+                    }
+                    String currentUrl = webView.getUrl();
+                    if (currentUrl != null) {
+                        webView.loadUrl(currentUrl);
                     }
                 }
             });
