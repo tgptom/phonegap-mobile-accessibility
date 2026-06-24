@@ -252,8 +252,8 @@
 {
     // NSLog(@"mSetTextZoom %f%%'", zoom);
     mFontScale = zoom/100;
-    NSString *zoomString = [NSString stringWithFormat:@"%f%%", zoom];
-    NSString *jsString = [NSString stringWithFormat:@"document.documentElement.style.fontSize = '%@';if(document.body){document.body.style.webkitTextSizeAdjust='%@';}", zoomString, zoomString];
+    NSString *zoomNumber = [NSString stringWithFormat:@"%g", zoom];
+    NSString *jsString = [NSString stringWithFormat:@"document.documentElement.style.fontSize = '%@' + '%%';if(document.body){document.body.style.webkitTextSizeAdjust='%@' + '%%';}", zoomNumber, zoomNumber];
     [self.commandDelegate evalJs:jsString];
 }
 
