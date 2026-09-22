@@ -126,7 +126,7 @@ public class MobileAccessibility extends CordovaPlugin {
                     boolean cacheCleared = false;
                     try {
                         if (webView.getEngine() != null) {
-                            webView.getEngine().clearCache(false);
+                            webView.getEngine().clearCache();
                             cacheCleared = true;
                         }
                     } catch (Throwable e) {
