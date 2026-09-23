@@ -134,33 +134,16 @@ An Android/Amazon Fire OS-specific proxy for the `MobileAccessibility.isScreenRe
 #### MobileAccessibility.isChromeVoxActive()
 
 
-On Android, this method returns `true` if ChromeVox is active and properly initialized with access to the text to speech API in the WebView.
-If TalkBack is running but ChromeVox is not active, this method is useful to alert the user of a potential problem.
+Deprecated compatibility shim. This method always returns `false`.
 
 ##### Returns
 
-- __boolean__ (Boolean) Returns `true` if ChromeVox is active and properly initialized with access to the text to speech API in the WebView.
+- __boolean__ (Boolean) Always returns `false`.
 
 ##### Usage
 
 ```javascript
-    MobileAccessibility.isTalkBackRunning(
-        function (bool) {
-            console.log('Talkback status: ' + bool);
-            if (bool) {
-                /* Use setTimeout to account for latency in initialization of ChromeVox */
-                setTimeout(function() {
-                    if (MobileAccessibility.isChromeVoxActive()) {
-                        console.log('ChromeVox is active.');
-                    } else {
-                        console.log('ChromeVox is not active.');
-
-                        /* Notify the user of a potential problem */
-                        MobileAccessibility.speak('The ChromeVox screen reader has failed to initialize. You may wish to close and restart this app.');
-                    }
-                }, 5000);
-            }
-        });
+    console.log("ChromeVox fallback is no longer used:", MobileAccessibility.isChromeVoxActive());
 ```
 
 ##### Supported Platforms
@@ -679,13 +662,15 @@ The following constants are for sending notifications to the accessibility API u
 #### MobileAccessibility.speak(string, queueMode, properties)
 
 
-Speaks a given string through the screenreader. On Android, if ChromeVox is active, it will use the specified queueMode and properties.
+Speaks a given string through the screenreader using the native accessibility announcement API.
 
 ##### Parameters
 
 - __string__ (string) A string to be announced by a screen reader.
 - __queueMode__ (Optional number) Valid modes are 0 for flush; 1 for queue.
 - __properties__ (Optional Object) Speech properties to use for this utterance.
+
+`queueMode` and `properties` are retained for backward compatibility and are not used by the native announcement path.
 
 ```javascript
     MobileAccessibility.speak('This string will be announced when a screen reader is active on the device.');
