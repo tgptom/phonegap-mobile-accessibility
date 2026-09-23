@@ -23,8 +23,6 @@ var argscheck = require('cordova/argscheck'),
     utils = require('cordova/utils'),
     exec = require('cordova/exec'),
     device = require('cordova-plugin-device.device'),
-    network = require('cordova-plugin-network-information.network'),
-    connection = require('cordova-plugin-network-information.Connection'),
     MobileAccessibilityNotifications = require('phonegap-plugin-mobile-accessibility.MobileAccessibilityNotifications');
 
 var MobileAccessibility = function() {
@@ -114,7 +112,6 @@ MobileAccessibility.onHasSubscribersChange = function() {
  */
 MobileAccessibility.prototype.isScreenReaderRunning = function(callback) {
     exec(function(bool) {
-        mobileAccessibility.activateOrDeactivateChromeVox(bool);
         callback(Boolean(bool));
     }, null, "MobileAccessibility", "isScreenReaderRunning", []);
 };
@@ -133,66 +130,7 @@ MobileAccessibility.prototype.isTalkBackRunning = function(callback) {
     }
 };
 MobileAccessibility.prototype.isChromeVoxActive = function () {
-    return typeof cvox !== "undefined" && cvox.ChromeVox.host.ttsLoaded() && cvox.Api.isChromeVoxActive();
-};
-MobileAccessibility.prototype.activateOrDeactivateChromeVox = function(bool) {
-    if (device.platform !== "Android") return;
-    if (typeof cvox === "undefined") {
-        if (bool) {
-            console.warn('A screen reader is running but ChromeVox has failed to initialize.');
-            if (navigator.connection.type === Connection.UNKNOWN || navigator.connection.type === Connection.NONE) {
-                mobileAccessibility.injectLocalAndroidVoxScript();
-            }
-        }
-    } else {
-        // activate or deactivate ChromeVox based on whether or not or not the screen reader is running.
-        try {
-            cvox.ChromeVox.host.activateOrDeactivateChromeVox(bool);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    if (bool) {
-        if (!mobileAccessibility.hasOrientationChangeListener) {
-            window.addEventListener("orientationchange", mobileAccessibility.onOrientationChange);
-            mobileAccessibility.hasOrientationChangeListener = true;
-        }
-    } else if(mobileAccessibility.hasOrientationChangeListener) {
-        window.removeEventListener("orientationchange", mobileAccessibility.onOrientationChange);
-        mobileAccessibility.hasOrientationChangeListener = false;
-    }
-};
-
-MobileAccessibility.prototype.hasOrientationChangeListener = false;
-MobileAccessibility.prototype.onOrientationChange = function(event) {
-    if (!mobileAccessibility.isChromeVoxActive()) return;
-    cvox.ChromeVox.navigationManager.updateIndicator();
-};
-
-MobileAccessibility.prototype.scriptInjected = false;
-MobileAccessibility.prototype.injectLocalAndroidVoxScript = function() {
-    var versionsplit = device.version.split('.');
-    if (device.platform !== "Android" ||
-        !(versionsplit[0] > 4 || (versionsplit[0] == 4 && versionsplit[1] >= 1))  ||
-        typeof cvox !== "undefined" || mobileAccessibility.scriptInjected) return;
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.async = true;
-    script.onload = function(){
-        // console.log(this.src + ' has loaded');
-        if (mobileAccessibility.isChromeVoxActive()) {
-            cordova.fireWindowEvent("screenreaderstatuschanged", {
-                isScreenReaderRunning: true
-            });
-        }
-    };
-
-    script.src = (versionsplit[0] > 4 || versionsplit[1] > 3)
-        ? "plugins/com.phonegap.plugin.mobile-accessibility/android/chromeandroidvox.js"
-        : "plugins/com.phonegap.plugin.mobile-accessibility/android/AndroidVox_v1.js";
-    document.getElementsByTagName('head')[0].appendChild(script);
-    mobileAccessibility.scriptInjected = true;
+    return false;
 };
 
 /**
@@ -377,28 +315,20 @@ MobileAccessibility.prototype.postNotification = function(mobileAccessibilityNot
 };
 
 /**
- * Speaks the given string, and if ChromeVox is active, it will use the specified queueMode and properties.
+ * Speaks the given string using the native accessibility announcement API.
  * @param {string} string A string to be announced by a screen reader.
  * @param {number} [queueMode] Optional number. Valid modes are 0 for flush; 1 for queue.
  * @param {Object} [properties] Speech properties to use for this utterance.
  */
 MobileAccessibility.prototype.speak = function(string, queueMode, properties) {
-    if (this.isChromeVoxActive()) {
-        cvox.ChromeVox.tts.speak(string, queueMode, properties);
-    } else {
-        exec(null, null, "MobileAccessibility", "postNotification", [MobileAccessibilityNotifications.ANNOUNCEMENT, string]);
-    }
+    exec(null, null, "MobileAccessibility", "postNotification", [MobileAccessibilityNotifications.ANNOUNCEMENT, string]);
 }
 
 /**
  * Stops speech.
  */
 MobileAccessibility.prototype.stop = function() {
-    if (this.isChromeVoxActive()) {
-        cvox.ChromeVox.tts.stop();
-    } else {
-        exec(null, null, "MobileAccessibility", "postNotification", [MobileAccessibilityNotifications.ANNOUNCEMENT, "\u200b"]);
-    }
+    exec(null, null, "MobileAccessibility", "postNotification", [MobileAccessibilityNotifications.ANNOUNCEMENT, "\u200b"]);
 }
 
 /**
@@ -422,7 +352,6 @@ MobileAccessibility.prototype.stop = function() {
  */
 MobileAccessibility.prototype._status = function(info) {
     if (info) {
-        mobileAccessibility.activateOrDeactivateChromeVox(info.isScreenReaderRunning);
         if (mobileAccessibility._isBoldTextEnabled !== info.isBoldTextEnabled) {
             mobileAccessibility._isBoldTextEnabled = info.isBoldTextEnabled;
             cordova.fireWindowEvent(MobileAccessibilityNotifications.BOLD_TEXT_STATUS_CHANGED, info);
